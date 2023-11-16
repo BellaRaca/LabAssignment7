@@ -5,6 +5,7 @@
 package ui;
 
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import model.User;
 import util.DatabaseConnector;
@@ -18,6 +19,10 @@ public class ViewPanel extends javax.swing.JPanel {
     /**
      * Creates new form ViewPanel
      */
+   private ArrayList<User> users;
+   private User selectedUser;
+   
+   
     public ViewPanel() {
         initComponents();
         SetPanel();
@@ -62,6 +67,11 @@ for (User user : users) {
         ageTitle.setText("Age:");
 
         saveButton.setText("Save");
+        saveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveButtonActionPerformed(evt);
+            }
+        });
 
         deleteButton.setText("Delete");
         deleteButton.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -71,6 +81,11 @@ for (User user : users) {
         });
 
         editButton.setText("Edit");
+        editButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editButtonActionPerformed(evt);
+            }
+        });
 
         userTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -176,6 +191,71 @@ for (User user : users) {
         
     }//GEN-LAST:event_deleteButtonMouseClicked
 
+    private void editButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editButtonActionPerformed
+        // TODO add your handling code here:
+        int selectedIndex = userTable.getSelectedRow();
+        if (selectedIndex == -1){
+            JOptionPane.showMessageDialog(this,"Please select a user to edit", "Edit Users",HEIGHT);
+           return;
+        }
+        try{
+        if (users == null || users.size() == 0) {
+  users = DatabaseConnector.getAllusers();
+}
+        User selectedUser = users.get(selectedIndex);
+        User newUser = new User();
+        newUser.setAge(Integer.parseInt(ageTextField.getText()));
+        newUser.setName(nameTextField.getText());
+        DatabaseConnector.editUser(selectedUser, newUser);
+        JOptionPane.showMessageDialog(null,"User Edited Successfully","Successfull Edit",JOptionPane.INFORMATION_MESSAGE);
+        clearFields();
+        populateTable();
+    }catch (Exception e){
+    JOptionPane.showMessageDialog(this,e.getMessage());
+     
+    }
+    }//GEN-LAST:event_editButtonActionPerformed
+
+    private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
+        // TODO add your handling code here:
+        User newUser = new User();
+        try{
+            newUser.setAge(Integer.parseInt(ageTextField.getText()));
+            newUser.setName(nameTextField.getText());
+            
+            DatabaseConnector.editUser(selectedUser,newUser);
+            JOptionPane.showMessageDialog(null, "User Registered Successfully","Successful Registrition",HEIGHT);
+            clearFields();
+            populateTable();
+        }catch(Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+                         
+        }
+        
+    }//GEN-LAST:event_saveButtonActionPerformed
+public void populateTable(){
+        try{
+            this.users = DatabaseConnector.getAllusers();
+            DefaultTableModel model = (DefaultTableModel) userTable.getModel();
+            model.setRowCount(0);
+            for (User u:users){
+                Object[] row = new Object[3];
+                row[0] = u.getId();
+                row[1] = u.getName();
+                row[2] = u.getAge();
+                model.addRow(row);
+            }
+            clearFields();
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+    }
+    
+    private void clearFields(){
+        nameTextField.setText("");
+        ageTextField.setText("");
+        selectedUser = null;
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField ageTextField;
@@ -191,3 +271,7 @@ for (User user : users) {
     private javax.swing.JTable userTable;
     // End of variables declaration//GEN-END:variables
 }
+
+
+
+
